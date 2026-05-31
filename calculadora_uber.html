@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora — Chofer de Uber</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #c8f542;
+    --accent2: #42f5a7;
+    --text: #f0f0f0;
+    --muted: #666;
+    --danger: #f54242;
+    --input-bg: #111;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* LAYOUT */
+  .shell {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: 100vh;
+  }
+
+  /* LEFT PANEL */
+  .left {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 32px 24px;
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 32px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 18px; font-weight: 500;
+    color: #000;
+  }
+  .logo-text { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+  .logo-sub  { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 24px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 12px; color: #aaa;
+    margin-bottom: 6px;
+  }
+  .field label span {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  input[type=range] {
+    width: 100%;
+    -webkit-appearance: none;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+  .toggle-group {
+    display: flex; gap: 6px;
+  }
+  .toggle-btn {
+    flex: 1;
+    padding: 7px;
+    border: 1px solid var(--border);
+    background: var(--input-bg);
+    color: var(--muted);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .toggle-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* RIGHT PANEL */
+  .right {
+    padding: 32px;
+    background: var(--bg);
+    overflow-y: auto;
+  }
+  .right-header {
+    margin-bottom: 28px;
+  }
+  .right-header h1 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+  .right-header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  /* METRICS GRID */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    transition: border-color 0.2s;
+  }
+  .metric:hover { border-color: #3a3a3a; }
+  .metric-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .metric-value {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .metric-value.accent { color: var(--accent); }
+  .metric-value.danger { color: var(--danger); }
+  .metric-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* WATERFALL */
+  .waterfall {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .waterfall-title {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .wf-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .wf-row:last-child { border-bottom: none; }
+  .wf-label { flex: 1; font-size: 13px; color: #bbb; }
+  .wf-bar-wrap { width: 140px; height: 6px; background: var(--border); border-radius: 3px; }
+  .wf-bar { height: 6px; border-radius: 3px; transition: width 0.4s ease; }
+  .wf-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    min-width: 100px;
+    text-align: right;
+  }
+  .wf-val.pos { color: var(--accent2); }
+  .wf-val.neg { color: #f5856a; }
+  .wf-val.total { color: var(--accent); font-weight: 600; font-size: 15px; }
+  .wf-val.total.loss { color: var(--danger); }
+
+  /* GAUGE */
+  .gauge-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .gauge-text h3 {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .gauge-text .big {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -1px;
+  }
+  .gauge-text p { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  svg.gauge circle { fill: none; }
+
+  /* FOOTER */
+  footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  @media (max-width: 700px) {
+    .shell { grid-template-columns: 1fr; }
+    .left { position: static; height: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- LEFT: INPUTS -->
+  <aside class="left">
+    <div class="logo">
+      <div class="logo-icon">U</div>
+      <div>
+        <div class="logo-text">Calculadora Chofer</div>
+        <div class="logo-sub">Buenos Aires · 2025</div>
+      </div>
+    </div>
+
+    <div class="section-label">Vehículo</div>
+    <div class="field">
+      <label>¿Es dueño del auto?</label>
+      <div class="toggle-group">
+        <button class="toggle-btn" id="btn-no" onclick="setDueno(false)">Alquila</button>
+        <button class="toggle-btn active" id="btn-si" onclick="setDueno(true)">Es dueño</button>
+      </div>
+    </div>
+
+    <div class="section-label">Actividad</div>
+
+    <div class="field">
+      <label>Precio por viaje <span id="lbl-precio">$10.400</span></label>
+      <input type="range" id="precio" min="5000" max="30000" step="500" value="10400" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Duración por viaje <span id="lbl-duracion">22 min</span></label>
+      <input type="range" id="duracion" min="10" max="60" step="1" value="22" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Horas activas / día <span id="lbl-horas">8 hs</span></label>
+      <input type="range" id="horas" min="4" max="14" step="0.5" value="8" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Días trabajados / mes <span id="lbl-dias">22 días</span></label>
+      <input type="range" id="dias" min="10" max="30" step="1" value="22" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Tiempo muerto <span id="lbl-muerto">30%</span></label>
+      <input type="range" id="muerto" min="10" max="50" step="5" value="30" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Comisión Uber <span id="lbl-comision">25%</span></label>
+      <input type="range" id="comision" min="15" max="35" step="1" value="25" oninput="calc()">
+    </div>
+
+    <div class="section-label">Costos fijos</div>
+
+    <div id="bloque-alquiler">
+      <div class="field">
+        <label>Alquiler del auto / mes <span id="lbl-alquiler">$350.000</span></label>
+        <input type="range" id="alquiler" min="100000" max="800000" step="10000" value="350000" oninput="calc()">
+      </div>
+    </div>
+    <div id="bloque-dueno" style="display:none">
+      <div class="field">
+        <label>Cuota préstamo / mes <span id="lbl-cuota">$0</span></label>
+        <input type="range" id="cuota" min="0" max="500000" step="10000" value="0" oninput="calc()">
+      </div>
+      <div class="field">
+        <label>Depreciación / mes <span id="lbl-depre">$80.000</span></label>
+        <input type="range" id="depre" min="20000" max="300000" step="5000" value="80000" oninput="calc()">
+      </div>
+    </div>
+    <div class="field">
+      <label>Seguro / mes <span id="lbl-seguro">$60.000</span></label>
+      <input type="range" id="seguro" min="20000" max="150000" step="5000" value="60000" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Celular / datos / mes <span id="lbl-celular">$15.000</span></label>
+      <input type="range" id="celular" min="5000" max="40000" step="1000" value="15000" oninput="calc()">
+    </div>
+
+    <div class="section-label">Costos variables</div>
+
+    <div class="field">
+      <label>Nafta ($/litro) <span id="lbl-nafta">$1.400</span></label>
+      <input type="range" id="nafta" min="800" max="3000" step="50" value="1400" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Consumo (km/litro) <span id="lbl-consumo">10 km/L</span></label>
+      <input type="range" id="consumo" min="6" max="18" step="1" value="10" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Km por viaje (ida+muerto) <span id="lbl-km">12 km</span></label>
+      <input type="range" id="km" min="5" max="30" step="1" value="12" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Mantenimiento / mes <span id="lbl-manto">$50.000</span></label>
+      <input type="range" id="manto" min="10000" max="200000" step="5000" value="50000" oninput="calc()">
+    </div>
+
+    <div class="section-label">Impuestos</div>
+    <div class="field">
+      <label>Categoría monotributo <span id="lbl-mono-cat">D</span></label>
+      <input type="range" id="mono-cat" min="0" max="10" step="1" value="3" oninput="calc()">
+    </div>
+    <div style="text-align:center; margin-top:-8px; margin-bottom:14px;">
+      <span style="font-size:11px; color:var(--muted); font-family:'DM Mono',monospace;" id="mono-desc">Cat. D — $35.000/mes</span>
+    </div>
+  </aside>
+
+  <!-- RIGHT: RESULTS -->
+  <main class="right">
+    <div class="right-header">
+      <h1>Ingresos estimados<br>del chofer</h1>
+      <p>Todos los valores en pesos argentinos · Actualizá los sliders para ver el impacto en tiempo real</p>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">Viajes / día</div>
+        <div class="metric-value" id="r-viajes-dia">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Viajes / mes</div>
+        <div class="metric-value" id="r-viajes-mes">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Ingreso bruto</div>
+        <div class="metric-value" id="r-bruto">—</div>
+        <div class="metric-sub">antes de comisión Uber</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Neto de Uber</div>
+        <div class="metric-value" id="r-neto-uber">—</div>
+        <div class="metric-sub">después de comisión</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Costos totales</div>
+        <div class="metric-value danger" id="r-costos">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Por hora trabajada</div>
+        <div class="metric-value accent" id="r-por-hora">—</div>
+      </div>
+    </div>
+
+    <div class="waterfall">
+      <div class="waterfall-title">Desglose mensual</div>
+
+      <div class="wf-row">
+        <span class="wf-label">Neto de Uber</span>
+        <div class="wf-bar-wrap"><div class="wf-bar" id="bar-neto" style="background:#42f5a7;width:100%"></div></div>
+        <span class="wf-val pos" id="wf-neto">—</span>
+      </div>
+      <div class="wf-row">
+        <span class="wf-label">— Vehículo (alquiler/cuota+depre)</span>
+        <div class="wf-bar-wrap"><div class="wf-bar" id="bar-auto" style="background:#f5856a"></div></div>
+        <span class="wf-val neg" id="wf-auto">—</span>
+      </div>
+      <div class="wf-row">
+        <span class="wf-label">— Nafta</span>
+        <div class="wf-bar-wrap"><div class="wf-bar" id="bar-nafta" style="background:#f5856a"></div></div>
+        <span class="wf-val neg" id="wf-nafta">—</span>
+      </div>
+      <div class="wf-row">
+        <span class="wf-label">— Seguro</span>
+        <div class="wf-bar-wrap"><div class="wf-bar" id="bar-seguro" style="background:#f5856a"></div></div>
+        <span class="wf-val neg" id="wf-seguro">—</span>
+      </div>
+      <div class="wf-row">
+        <span class="wf-label">— Mantenimiento</span>
+        <div class="wf-bar-wrap"><div class="wf-bar" id="bar-manto" style="background:#f5856a"></div></div>
+        <span class="wf-val neg" id="wf-manto">—</span>
+      </div>
+      <div class="wf-row">
+        <span class="wf-label">— Celular / datos</span>
+        <div class="wf-bar-wrap"><div class="wf-bar" id="bar-cel" style="background:#f5856a"></div></div>
+        <span class="wf-val neg" id="wf-cel">—</span>
+      </div>
+      <div class="wf-row">
+        <span class="wf-label">— Monotributo</span>
+        <div class="wf-bar-wrap"><div class="wf-bar" id="bar-mono" style="background:#f5856a"></div></div>
+        <span class="wf-val neg" id="wf-mono">—</span>
+      </div>
+      <div class="wf-row" style="border-top:1px solid #3a3a3a; margin-top:4px; padding-top:12px;">
+        <span class="wf-label" style="font-weight:600; color:var(--text);">BOLSILLO NETO</span>
+        <div class="wf-bar-wrap"><div class="wf-bar" id="bar-bolsillo" style="background:var(--accent)"></div></div>
+        <span class="wf-val total" id="wf-bolsillo">—</span>
+      </div>
+    </div>
+
+    <div class="gauge-wrap">
+      <svg width="90" height="90" viewBox="0 0 90 90">
+        <circle cx="45" cy="45" r="36" stroke="#222" stroke-width="10"/>
+        <circle id="gauge-circle" cx="45" cy="45" r="36"
+          stroke="#c8f542" stroke-width="10"
+          stroke-dasharray="226" stroke-dashoffset="226"
+          stroke-linecap="round"
+          transform="rotate(-90 45 45)"
+          style="transition: stroke-dashoffset 0.5s ease, stroke 0.3s"/>
+      </svg>
+      <div class="gauge-text">
+        <h3>Margen neto</h3>
+        <div class="big" id="gauge-pct">—</div>
+        <p>sobre el ingreso bruto · <span id="gauge-label">calculando...</span></p>
+      </div>
+    </div>
+
+    <footer>
+      Calculadora de uso personal · Valores orientativos · No incluye aportes jubilatorios · Monotributo sujeto a actualización trimestral AFIP
+    </footer>
+  </main>
+</div>
+
+<script>
+const MONO = [
+  {cat:'A', cuota:22000},  {cat:'B', cuota:25000},  {cat:'C', cuota:28000},
+  {cat:'D', cuota:35000},  {cat:'E', cuota:45000},  {cat:'F', cuota:57000},
+  {cat:'G', cuota:72000},  {cat:'H', cuota:95000},  {cat:'I', cuota:120000},
+  {cat:'J', cuota:150000}, {cat:'K', cuota:180000},
+];
+
+let esDueno = true;
+
+function setDueno(v) {
+  esDueno = v;
+  document.getElementById('btn-si').classList.toggle('active', v);
+  document.getElementById('btn-no').classList.toggle('active', !v);
+  document.getElementById('bloque-alquiler').style.display = v ? 'none' : 'block';
+  document.getElementById('bloque-dueno').style.display   = v ? 'block' : 'none';
+  calc();
+}
+
+function g(id) { return parseFloat(document.getElementById(id).value); }
+function fmt(n) { return '$' + Math.round(n).toLocaleString('es-AR'); }
+
+function calc() {
+  const precio    = g('precio');
+  const duracion  = g('duracion');
+  const horas     = g('horas');
+  const dias      = g('dias');
+  const muerto    = g('muerto') / 100;
+  const comision  = g('comision') / 100;
+  const seguro    = g('seguro');
+  const celular   = g('celular');
+  const nafta_p   = g('nafta');
+  const consumo   = g('consumo');
+  const km        = g('km');
+  const manto     = g('manto');
+  const monoIdx   = Math.round(g('mono-cat'));
+  const mono      = MONO[monoIdx];
+
+  // Vehicle cost
+  let costVehiculo;
+  if (esDueno) {
+    costVehiculo = g('cuota') + g('depre');
+    document.getElementById('lbl-cuota').textContent = fmt(g('cuota'));
+    document.getElementById('lbl-depre').textContent = fmt(g('depre'));
+  } else {
+    costVehiculo = g('alquiler');
+    document.getElementById('lbl-alquiler').textContent = fmt(g('alquiler'));
+  }
+
+  // Labels
+  document.getElementById('lbl-precio').textContent    = fmt(precio);
+  document.getElementById('lbl-duracion').textContent  = duracion + ' min';
+  document.getElementById('lbl-horas').textContent     = horas + ' hs';
+  document.getElementById('lbl-dias').textContent      = dias + ' días';
+  document.getElementById('lbl-muerto').textContent    = Math.round(muerto*100) + '%';
+  document.getElementById('lbl-comision').textContent  = Math.round(comision*100) + '%';
+  document.getElementById('lbl-seguro').textContent    = fmt(seguro);
+  document.getElementById('lbl-celular').textContent   = fmt(celular);
+  document.getElementById('lbl-nafta').textContent     = fmt(nafta_p);
+  document.getElementById('lbl-consumo').textContent   = consumo + ' km/L';
+  document.getElementById('lbl-km').textContent        = km + ' km';
+  document.getElementById('lbl-manto').textContent     = fmt(manto);
+  document.getElementById('lbl-mono-cat').textContent  = 'Cat. ' + mono.cat;
+  document.getElementById('mono-desc').textContent     = 'Cat. ' + mono.cat + ' — ' + fmt(mono.cuota) + '/mes';
+
+  // Calculations
+  const minsProductivos = horas * 60 * (1 - muerto);
+  const viajesDia       = Math.floor(minsProductivos / duracion);
+  const viajesMes       = viajesDia * dias;
+  const bruto           = viajesMes * precio;
+  const netoUber        = bruto * (1 - comision);
+  const kmMes           = viajesMes * km;
+  const costNafta       = (kmMes / consumo) * nafta_p;
+  const costMono        = mono.cuota;
+  const totalCostos     = costVehiculo + seguro + celular + manto + costNafta + costMono;
+  const bolsillo        = netoUber - totalCostos;
+  const horasMes        = horas * dias;
+  const porHora         = bolsillo / horasMes;
+  const margen          = netoUber > 0 ? bolsillo / bruto : 0;
+
+  // Metrics
+  document.getElementById('r-viajes-dia').textContent = viajesDia;
+  document.getElementById('r-viajes-mes').textContent = viajesMes;
+  document.getElementById('r-bruto').textContent      = fmt(bruto);
+  document.getElementById('r-neto-uber').textContent  = fmt(netoUber);
+  document.getElementById('r-costos').textContent     = fmt(totalCostos);
+  document.getElementById('r-por-hora').textContent   = fmt(porHora);
+
+  // Waterfall
+  document.getElementById('wf-neto').textContent   = fmt(netoUber);
+  document.getElementById('wf-auto').textContent   = '−' + fmt(costVehiculo);
+  document.getElementById('wf-nafta').textContent  = '−' + fmt(costNafta);
+  document.getElementById('wf-seguro').textContent = '−' + fmt(seguro);
+  document.getElementById('wf-manto').textContent  = '−' + fmt(manto);
+  document.getElementById('wf-cel').textContent    = '−' + fmt(celular);
+  document.getElementById('wf-mono').textContent   = '−' + fmt(costMono);
+
+  const bolsilloEl = document.getElementById('wf-bolsillo');
+  bolsilloEl.textContent = fmt(bolsillo);
+  bolsilloEl.className   = 'wf-val total' + (bolsillo < 0 ? ' loss' : '');
+
+  // Bars
+  const items = [
+    {bar:'bar-auto',   val:costVehiculo},
+    {bar:'bar-nafta',  val:costNafta},
+    {bar:'bar-seguro', val:seguro},
+    {bar:'bar-manto',  val:manto},
+    {bar:'bar-cel',    val:celular},
+    {bar:'bar-mono',   val:costMono},
+  ];
+  items.forEach(({bar, val}) => {
+    const pct = netoUber > 0 ? Math.min(100, (val / netoUber) * 100) : 0;
+    document.getElementById(bar).style.width = pct + '%';
+  });
+  const bolsPct = netoUber > 0 ? Math.max(0, Math.min(100, (bolsillo / netoUber) * 100)) : 0;
+  document.getElementById('bar-bolsillo').style.width = bolsPct + '%';
+  document.getElementById('bar-bolsillo').style.background = bolsillo >= 0 ? 'var(--accent)' : 'var(--danger)';
+
+  // Gauge
+  const pctDisplay = Math.round(margen * 100);
+  const circ = 226;
+  const offset = circ - (Math.max(0, Math.min(1, margen)) * circ);
+  document.getElementById('gauge-circle').style.strokeDashoffset = offset;
+  document.getElementById('gauge-circle').style.stroke =
+    margen < 0 ? '#f54242' : margen < 0.15 ? '#f5c542' : '#c8f542';
+  document.getElementById('gauge-pct').textContent = pctDisplay + '%';
+  document.getElementById('gauge-pct').style.color =
+    margen < 0 ? '#f54242' : margen < 0.15 ? '#f5c542' : '#c8f542';
+  document.getElementById('gauge-label').textContent =
+    margen < 0 ? 'en pérdida' : margen < 0.15 ? 'margen ajustado' : 'margen saludable';
+}
+
+// Init
+setDueno(false);
+calc();
+</script>
+</body>
+</html>
