@@ -274,7 +274,7 @@
       <div class="logo-icon">U</div>
       <div>
         <div class="logo-text">Calculadora Chofer</div>
-        <div class="logo-sub">Buenos Aires · 2025</div>
+        <div class="logo-sub">Buenos Aires · 2026</div>
       </div>
     </div>
 
@@ -318,8 +318,8 @@
 
     <div id="bloque-alquiler">
       <div class="field">
-        <label>Alquiler del auto / mes <span id="lbl-alquiler">$350.000</span></label>
-        <input type="range" id="alquiler" min="100000" max="800000" step="10000" value="350000" oninput="calc()">
+        <label>Alquiler del auto / mes <span id="lbl-alquiler">$1.400.000</span></label>
+        <input type="range" id="alquiler" min="500000" max="3000000" step="50000" value="1400000" oninput="calc()">
       </div>
     </div>
     <div id="bloque-dueno" style="display:none">
@@ -334,7 +334,7 @@
     </div>
     <div class="field">
       <label>Seguro / mes <span id="lbl-seguro">$60.000</span></label>
-      <input type="range" id="seguro" min="20000" max="150000" step="5000" value="60000" oninput="calc()">
+      <input type="range" id="seguro" min="20000" max="150000" step="5000" value="85000" oninput="calc()">
     </div>
     <div class="field">
       <label>Celular / datos / mes <span id="lbl-celular">$15.000</span></label>
@@ -344,12 +344,19 @@
     <div class="section-label">Costos variables</div>
 
     <div class="field">
-      <label>Nafta ($/litro) <span id="lbl-nafta">$1.400</span></label>
-      <input type="range" id="nafta" min="800" max="3000" step="50" value="1400" oninput="calc()">
+      <label>Tipo de combustible</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" id="btn-nafta" onclick="setCombustible('nafta')">Nafta</button>
+        <button class="toggle-btn" id="btn-gnc" onclick="setCombustible('gnc')">GNC</button>
+      </div>
     </div>
     <div class="field">
-      <label>Consumo (km/litro) <span id="lbl-consumo">10 km/L</span></label>
-      <input type="range" id="consumo" min="6" max="18" step="1" value="10" oninput="calc()">
+      <label><span id="lbl-combustible-tipo">Nafta</span> ($/m³ o litro) <span id="lbl-nafta">$1.400</span></label>
+      <input type="range" id="nafta" min="200" max="3000" step="50" value="1400" oninput="calc()">
+    </div>
+    <div class="field">
+      <label>Consumo <span id="lbl-consumo-unidad">(km/litro)</span> <span id="lbl-consumo">10 km/L</span></label>
+      <input type="range" id="consumo" min="6" max="25" step="1" value="10" oninput="calc()">
     </div>
     <div class="field">
       <label>Km por viaje (ida+muerto) <span id="lbl-km">12 km</span></label>
@@ -420,7 +427,7 @@
         <span class="wf-val neg" id="wf-auto">—</span>
       </div>
       <div class="wf-row">
-        <span class="wf-label">— Nafta</span>
+        <span class="wf-label" id="wf-combustible-label">— Nafta</span>
         <div class="wf-bar-wrap"><div class="wf-bar" id="bar-nafta" style="background:#f5856a"></div></div>
         <span class="wf-val neg" id="wf-nafta">—</span>
       </div>
@@ -482,6 +489,27 @@ const MONO = [
   {cat:'J', cuota:150000}, {cat:'K', cuota:180000},
 ];
 
+let esCombustibleGNC = false;
+
+function setCombustible(tipo) {
+  esCombustibleGNC = (tipo === 'gnc');
+  document.getElementById('btn-nafta').classList.toggle('active', !esCombustibleGNC);
+  document.getElementById('btn-gnc').classList.toggle('active', esCombustibleGNC);
+  const slider = document.getElementById('nafta');
+  if (esCombustibleGNC) {
+    slider.min = 100; slider.max = 800; slider.step = 10; slider.value = 350;
+    document.getElementById('lbl-combustible-tipo').textContent = 'GNC';
+    document.getElementById('lbl-consumo-unidad').textContent = '(km/m³)';
+    document.getElementById('consumo').value = 15;
+  } else {
+    slider.min = 800; slider.max = 3000; slider.step = 50; slider.value = 1400;
+    document.getElementById('lbl-combustible-tipo').textContent = 'Nafta';
+    document.getElementById('lbl-consumo-unidad').textContent = '(km/litro)';
+    document.getElementById('consumo').value = 10;
+  }
+  calc();
+}
+
 let esDueno = true;
 
 function setDueno(v) {
@@ -530,10 +558,10 @@ function calc() {
   document.getElementById('lbl-dias').textContent      = dias + ' días';
   document.getElementById('lbl-muerto').textContent    = Math.round(muerto*100) + '%';
   document.getElementById('lbl-comision').textContent  = Math.round(comision*100) + '%';
-  document.getElementById('lbl-seguro').textContent    = fmt(seguro);
-  document.getElementById('lbl-celular').textContent   = fmt(celular);
-  document.getElementById('lbl-nafta').textContent     = fmt(nafta_p);
-  document.getElementById('lbl-consumo').textContent   = consumo + ' km/L';
+  document.getElementById('lbl-seguro').textContent   = fmt(seguro);
+  document.getElementById('lbl-celular').textContent  = fmt(celular);
+  document.getElementById('lbl-nafta').textContent    = fmt(nafta_p) + (esCombustibleGNC ? '/m³' : '/L');
+  document.getElementById('lbl-consumo').textContent  = consumo + (esCombustibleGNC ? ' km/m³' : ' km/L');
   document.getElementById('lbl-km').textContent        = km + ' km';
   document.getElementById('lbl-manto').textContent     = fmt(manto);
   document.getElementById('lbl-mono-cat').textContent  = 'Cat. ' + mono.cat;
@@ -566,6 +594,7 @@ function calc() {
   document.getElementById('wf-neto').textContent   = fmt(netoUber);
   document.getElementById('wf-auto').textContent   = '−' + fmt(costVehiculo);
   document.getElementById('wf-nafta').textContent  = '−' + fmt(costNafta);
+  document.getElementById('wf-combustible-label').textContent = '— ' + (esCombustibleGNC ? 'GNC' : 'Nafta');
   document.getElementById('wf-seguro').textContent = '−' + fmt(seguro);
   document.getElementById('wf-manto').textContent  = '−' + fmt(manto);
   document.getElementById('wf-cel').textContent    = '−' + fmt(celular);
@@ -606,9 +635,11 @@ function calc() {
     margen < 0 ? 'en pérdida' : margen < 0.15 ? 'margen ajustado' : 'margen saludable';
 }
 
-// Init
-setDueno(false);
-calc();
+// Init — esperar a que el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+  setDueno(false);
+  calc();
+});
 </script>
 </body>
 </html>
