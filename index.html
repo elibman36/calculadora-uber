@@ -84,7 +84,30 @@
     color: var(--accent);
     font-weight: 500;
   }
-  input[type=range] {
+  input[type=text].val-input {
+    width: 80px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    text-align: right;
+    outline: none;
+  }
+  input[type=text].val-input:focus {
+    border-color: var(--accent);
+  }
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .slider-row input[type=range] {
+    flex: 1;
+    margin: 0;
+  }
     width: 100%;
     -webkit-appearance: none;
     height: 3px;
@@ -291,27 +314,45 @@
 
     <div class="field">
       <label>Precio por viaje <span id="lbl-precio">$10.400</span></label>
-      <input type="range" id="precio" min="5000" max="30000" step="500" value="10400" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="precio" min="5000" max="30000" step="500" value="10400" oninput="syncInput('precio')">
+        <input type="text" class="val-input" id="txt-precio" value="10400" onchange="syncSlider('precio')">
+      </div>
     </div>
     <div class="field">
       <label>Duración por viaje <span id="lbl-duracion">22 min</span></label>
-      <input type="range" id="duracion" min="10" max="60" step="1" value="22" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="duracion" min="10" max="60" step="1" value="22" oninput="syncInput('duracion')">
+        <input type="text" class="val-input" id="txt-duracion" value="22" onchange="syncSlider('duracion')">
+      </div>
     </div>
     <div class="field">
       <label>Horas activas / día <span id="lbl-horas">8 hs</span></label>
-      <input type="range" id="horas" min="4" max="14" step="0.5" value="8" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="horas" min="4" max="14" step="0.5" value="8" oninput="syncInput('horas')">
+        <input type="text" class="val-input" id="txt-horas" value="8" onchange="syncSlider('horas')">
+      </div>
     </div>
     <div class="field">
       <label>Días trabajados / mes <span id="lbl-dias">22 días</span></label>
-      <input type="range" id="dias" min="10" max="30" step="1" value="22" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="dias" min="10" max="30" step="1" value="22" oninput="syncInput('dias')">
+        <input type="text" class="val-input" id="txt-dias" value="22" onchange="syncSlider('dias')">
+      </div>
     </div>
     <div class="field">
       <label>Tiempo muerto <span id="lbl-muerto">30%</span></label>
-      <input type="range" id="muerto" min="10" max="50" step="5" value="30" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="muerto" min="10" max="50" step="5" value="30" oninput="syncInput('muerto')">
+        <input type="text" class="val-input" id="txt-muerto" value="30" onchange="syncSlider('muerto')">
+      </div>
     </div>
     <div class="field">
       <label>Comisión Uber <span id="lbl-comision">25%</span></label>
-      <input type="range" id="comision" min="15" max="35" step="1" value="25" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="comision" min="15" max="35" step="1" value="25" oninput="syncInput('comision')">
+        <input type="text" class="val-input" id="txt-comision" value="25" onchange="syncSlider('comision')">
+      </div>
     </div>
 
     <div class="section-label">Costos fijos</div>
@@ -319,26 +360,41 @@
     <div id="bloque-alquiler">
       <div class="field">
         <label>Alquiler del auto / mes <span id="lbl-alquiler">$1.400.000</span></label>
-        <input type="range" id="alquiler" min="500000" max="3000000" step="50000" value="1400000" oninput="calc()">
+        <div class="slider-row">
+          <input type="range" id="alquiler" min="500000" max="3000000" step="50000" value="1400000" oninput="syncInput('alquiler')">
+          <input type="text" class="val-input" id="txt-alquiler" value="1400000" onchange="syncSlider('alquiler')">
+        </div>
       </div>
     </div>
     <div id="bloque-dueno" style="display:none">
       <div class="field">
         <label>Cuota préstamo / mes <span id="lbl-cuota">$0</span></label>
-        <input type="range" id="cuota" min="0" max="500000" step="10000" value="0" oninput="calc()">
+        <div class="slider-row">
+          <input type="range" id="cuota" min="0" max="500000" step="10000" value="0" oninput="syncInput('cuota')">
+          <input type="text" class="val-input" id="txt-cuota" value="0" onchange="syncSlider('cuota')">
+        </div>
       </div>
       <div class="field">
         <label>Depreciación / mes <span id="lbl-depre">$80.000</span></label>
-        <input type="range" id="depre" min="20000" max="300000" step="5000" value="80000" oninput="calc()">
+        <div class="slider-row">
+          <input type="range" id="depre" min="20000" max="300000" step="5000" value="80000" oninput="syncInput('depre')">
+          <input type="text" class="val-input" id="txt-depre" value="80000" onchange="syncSlider('depre')">
+        </div>
       </div>
     </div>
     <div class="field">
       <label>Seguro / mes <span id="lbl-seguro">$85.000</span></label>
-      <input type="range" id="seguro" min="20000" max="150000" step="5000" value="85000" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="seguro" min="20000" max="150000" step="5000" value="85000" oninput="syncInput('seguro')">
+        <input type="text" class="val-input" id="txt-seguro" value="85000" onchange="syncSlider('seguro')">
+      </div>
     </div>
     <div class="field">
       <label>Celular / datos / mes <span id="lbl-celular">$15.000</span></label>
-      <input type="range" id="celular" min="5000" max="40000" step="1000" value="15000" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="celular" min="5000" max="40000" step="1000" value="15000" oninput="syncInput('celular')">
+        <input type="text" class="val-input" id="txt-celular" value="15000" onchange="syncSlider('celular')">
+      </div>
     </div>
 
     <div class="section-label">Costos variables</div>
@@ -352,19 +408,31 @@
     </div>
     <div class="field">
       <label><span id="lbl-combustible-tipo">Nafta</span> ($/m³ o litro) <span id="lbl-nafta">$1.400</span></label>
-      <input type="range" id="nafta" min="200" max="3000" step="50" value="1400" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="nafta" min="200" max="3000" step="50" value="1400" oninput="syncInput('nafta')">
+        <input type="text" class="val-input" id="txt-nafta" value="1400" onchange="syncSlider('nafta')">
+      </div>
     </div>
     <div class="field">
       <label>Consumo <span id="lbl-consumo-unidad">(km/litro)</span> <span id="lbl-consumo">10 km/L</span></label>
-      <input type="range" id="consumo" min="6" max="25" step="1" value="10" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="consumo" min="6" max="25" step="1" value="10" oninput="syncInput('consumo')">
+        <input type="text" class="val-input" id="txt-consumo" value="10" onchange="syncSlider('consumo')">
+      </div>
     </div>
     <div class="field">
       <label>Km por viaje (ida+muerto) <span id="lbl-km">12 km</span></label>
-      <input type="range" id="km" min="5" max="30" step="1" value="12" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="km" min="5" max="30" step="1" value="12" oninput="syncInput('km')">
+        <input type="text" class="val-input" id="txt-km" value="12" onchange="syncSlider('km')">
+      </div>
     </div>
     <div class="field">
       <label>Mantenimiento / mes <span id="lbl-manto">$50.000</span></label>
-      <input type="range" id="manto" min="10000" max="200000" step="5000" value="50000" oninput="calc()">
+      <div class="slider-row">
+        <input type="range" id="manto" min="10000" max="200000" step="5000" value="50000" oninput="syncInput('manto')">
+        <input type="text" class="val-input" id="txt-manto" value="50000" onchange="syncSlider('manto')">
+      </div>
     </div>
 
     <div class="section-label">Impuestos</div>
@@ -373,7 +441,7 @@
       <input type="range" id="mono-cat" min="0" max="10" step="1" value="3" oninput="calc()">
     </div>
     <div style="text-align:center; margin-top:-8px; margin-bottom:14px;">
-      <span style="font-size:11px; color:var(--muted); font-family:'DM Mono',monospace;" id="mono-desc">Cat. D — $35.000/mes</span>
+      <span style="font-size:11px; color:var(--muted); font-family:'DM Mono',monospace;" id="mono-desc">Cat. D — $72.414/mes</span>
     </div>
   </aside>
 
@@ -482,6 +550,29 @@
 </div>
 
 <script>
+// Sync slider → text input → recalc
+function syncInput(id) {
+  const slider = document.getElementById(id);
+  const txt = document.getElementById('txt-' + id);
+  if (txt) txt.value = slider.value;
+  calc();
+}
+
+// Sync text input → slider → recalc
+function syncSlider(id) {
+  const txt = document.getElementById('txt-' + id);
+  const slider = document.getElementById(id);
+  if (!txt || !slider) return;
+  let val = parseFloat(txt.value.replace(/[.$,]/g, '').replace(',', '.'));
+  if (isNaN(val)) return;
+  // Expandir rango si el valor ingresado supera el máximo
+  if (val > parseFloat(slider.max)) slider.max = val;
+  if (val < parseFloat(slider.min)) slider.min = val;
+  slider.value = val;
+  calc();
+}
+
+
 const MONO = [
   {cat:'A', cuota:42387},   {cat:'B', cuota:48251},   {cat:'C', cuota:56502},
   {cat:'D', cuota:72414},   {cat:'E', cuota:91000},   {cat:'F', cuota:114000},
@@ -501,11 +592,15 @@ function setCombustible(tipo) {
     document.getElementById('lbl-combustible-tipo').textContent = 'GNC';
     document.getElementById('lbl-consumo-unidad').textContent = '(km/m³)';
     document.getElementById('consumo').value = 15;
+    document.getElementById('txt-nafta').value = 350;
+    document.getElementById('txt-consumo').value = 15;
   } else {
     slider.min = 800; slider.max = 3000; slider.step = 50; slider.value = 1400;
     document.getElementById('lbl-combustible-tipo').textContent = 'Nafta';
     document.getElementById('lbl-consumo-unidad').textContent = '(km/litro)';
     document.getElementById('consumo').value = 10;
+    document.getElementById('txt-nafta').value = 1400;
+    document.getElementById('txt-consumo').value = 10;
   }
   calc();
 }
