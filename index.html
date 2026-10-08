@@ -108,6 +108,7 @@
     flex: 1;
     margin: 0;
   }
+  input[type=range] {
     width: 100%;
     -webkit-appearance: none;
     height: 3px;
@@ -305,8 +306,8 @@
     <div class="field">
       <label>¿Es dueño del auto?</label>
       <div class="toggle-group">
-        <button class="toggle-btn" id="btn-no" onclick="setDueno(false)">Alquila</button>
-        <button class="toggle-btn active" id="btn-si" onclick="setDueno(true)">Es dueño</button>
+        <button class="toggle-btn active" id="btn-no" onclick="setDueno(false)">Alquila</button>
+        <button class="toggle-btn" id="btn-si" onclick="setDueno(true)">Es dueño</button>
       </div>
     </div>
 
@@ -315,7 +316,7 @@
     <div class="field">
       <label>Precio por viaje <span id="lbl-precio">$10.400</span></label>
       <div class="slider-row">
-        <input type="range" id="precio" min="5000" max="30000" step="500" value="10400" oninput="syncInput('precio')">
+        <input type="range" id="precio" min="5000" max="30000" step="100" value="10400" oninput="syncInput('precio')">
         <input type="text" class="val-input" id="txt-precio" value="10400" onchange="syncSlider('precio')">
       </div>
     </div>
@@ -527,7 +528,7 @@
     </div>
 
     <div class="gauge-wrap">
-      <svg width="90" height="90" viewBox="0 0 90 90">
+      <svg class="gauge" width="90" height="90" viewBox="0 0 90 90">
         <circle cx="45" cy="45" r="36" stroke="#222" stroke-width="10"/>
         <circle id="gauge-circle" cx="45" cy="45" r="36"
           stroke="#c8f542" stroke-width="10"
@@ -563,7 +564,9 @@ function syncSlider(id) {
   const txt = document.getElementById('txt-' + id);
   const slider = document.getElementById(id);
   if (!txt || !slider) return;
-  let val = parseFloat(txt.value.replace(/[.$,]/g, '').replace(',', '.'));
+  // Formato argentino: "1.400.000" → 1400000, "8,5" → 8.5, "8.5" → 8.5
+  const limpio = txt.value.replace(/[$\s]/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.');
+  let val = parseFloat(limpio);
   if (isNaN(val)) return;
   // Expandir rango si el valor ingresado supera el máximo
   if (val > parseFloat(slider.max)) slider.max = val;
@@ -605,7 +608,7 @@ function setCombustible(tipo) {
   calc();
 }
 
-let esDueno = true;
+let esDueno = false;
 
 function setDueno(v) {
   esDueno = v;
